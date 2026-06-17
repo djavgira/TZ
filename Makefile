@@ -14,7 +14,12 @@ LDFLAGS     := -s -w \
 OUT_DIR     := bin
 COVER_DIR   := coverage
 
-.PHONY: all build clean test test-cover lint fmt vet install cross-build
+DOCKER_IMAGE ?= pain_tz
+DOCKER_TAG    ?= latest
+DOCKERFILE    ?= Dockerfile
+
+.PHONY: all build clean test test-cover lint fmt vet install cross-build \
+        docker-build docker-run docker-push docker-clean
 
 all: fmt vet test build
 
@@ -53,3 +58,47 @@ install: build
 	sudo cp configs/$(APP_NAME).yaml /etc/$(APP_NAME)/
 	sudo cp deployments/systemd/$(APP_NAME).service /etc/systemd/system/
 	sudo systemctl daemon-reload
+
+# --- Docker targets ---
+
+docker-build:
+	docker build \
+		--build-arg VERSION=$(VERSION) \
+		--build-arg COMMIT=$(COMMIT) \
+		--build-arg BUILD_DATE=$(BUILD_DATE) \
+		-t $(DOCKER_IMAGE):$(DOCKER_TAG) \
+		-f $(DOCKERFILE) .
+
+docker-build-nc:  # "no-cache" build for CI
+	docker build --no-cache \
+		--build-arg VERSION=$(VERSION) \
+		--build-arg COMMIT=$(COMMIT) \
+		--build-arg BUILD_DATE=$(BUILD_DATE) \
+		-t $(DOCKER_IMAGE):$(DOCKER_TAG) \
+		-f $(DOCKERFILE) .
+
+docker-run:
+	docker run --rm -it \
+		--name $(APP_NAME) \
+		--pid=host \
+		--read-only \
+		--tmpfs /tmp:size=1M,mode=1777 \
+		-v /proc:/host/proc:ro \
+		-v /sys:/host/sys:ro \
+		-e HOST_PROC=/host/proc \
+		-e HOST_SYS=/host/sys \
+		-p 9100:9100 \
+		$(DOCKER_IMAGE):$(DOCKER_TAG)
+
+docker-compose-up:
+	docker-compose up -d
+
+docker-compose-down:
+	docker-compose down
+
+docker-push:
+	docker push $(DOCKER_IMAGE):$(DOCKER_TAG)
+
+docker-clean:
+	docker rmi $(DOCKER_IMAGE):$(DOCKER_TAG) || true
+	docker image prune -f
