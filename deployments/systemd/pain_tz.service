@@ -1,0 +1,43 @@
+[Unit]
+Description=Pain TZ - Lightweight Linux Monitoring Agent
+Documentation=https://github.com/Alice/pain_tz
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=pain_tz
+Group=pain_tz
+ExecStart=/usr/local/bin/pain_tz serve --config /etc/pain_tz/pain_tz.yaml
+
+# Restart policy
+Restart=always
+RestartSec=5
+
+# Security hardening
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/log/pain_tz
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictRealtime=yes
+
+# Resource limits
+LimitNOFILE=65536
+MemoryHigh=35M
+MemoryMax=50M
+CPUQuota=5%
+TasksMax=50
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=pain_tz
+
+[Install]
+WantedBy=multi-user.target

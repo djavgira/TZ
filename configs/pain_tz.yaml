@@ -1,0 +1,70 @@
+# pain_tz — Lightweight Linux Monitoring Agent
+# Default configuration file
+
+agent:
+  # Human-readable identifier for this agent instance.
+  # If empty, the system hostname is used automatically.
+  host_id: ""
+
+collectors:
+  cpu:
+    enabled: true
+    # Sampling interval. cpu.Percent() blocks for this duration.
+    interval: 10s
+    # If true, report per-core metrics (increases cardinality).
+    per_core: false
+
+  memory:
+    enabled: true
+    interval: 15s
+    # Include swap metrics.
+    include_swap: true
+
+  disk:
+    enabled: true
+    interval: 30s
+    # Which mount points to monitor. Empty means all non-virtual filesystems.
+    mount_points: []
+    # Include per-disk IO counters (read/write bytes, iops).
+    include_io: true
+    # Filesystem type denylist. Defaults skip tmpfs, devtmpfs, squashfs, overlay.
+    fs_type_denylist:
+      - "tmpfs"
+      - "devtmpfs"
+      - "squashfs"
+      - "overlay"
+
+  network:
+    enabled: true
+    interval: 15s
+    # Which interfaces to monitor. Empty means all except those in interface_denylist.
+    interfaces: []
+    # Interface name denylist.
+    interface_denylist:
+      - "lo"
+
+server:
+  listen_addr: ":9100"
+  metrics_path: "/metrics"
+  health_path: "/health"
+  readiness_path: "/ready"
+  # Timeout for graceful shutdown.
+  shutdown_timeout: 10s
+  # Max header size to limit memory usage.
+  max_header_bytes: 1048576  # 1 MiB
+  read_timeout: 5s
+  write_timeout: 10s
+  idle_timeout: 120s
+
+logging:
+  # debug, info, warn, error
+  level: "info"
+  # json (structured) or text (human-readable)
+  format: "json"
+  # stdout or file
+  output: "stdout"
+  # Only used when output is "file".
+  file_path: "/var/log/pain_tz/agent.log"
+  max_size_mb: 100
+  max_age_days: 30
+  max_backups: 10
