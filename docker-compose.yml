@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  pain_tz:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: pain_tz:latest
+    container_name: pain_tz
+    restart: unless-stopped
+
+    # Mount host /proc and /sys (read-only) so gopsutil can read system metrics
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      # Optional: mount custom config
+      # - ./configs/pain_tz.yaml:/etc/pain_tz/pain_tz.yaml:ro
+
+    # Override config via environment variables (PAIN_TZ_ prefix)
+    environment:
+      - PAIN_TZ_AGENT_HOST_ID=${HOSTNAME:-unknown}
+      # Override gopsutil paths to use /host/proc and /host/sys
+      - HOST_PROC=/host/proc
+      - HOST_SYS=/host/sys
+
+    ports:
+      - "9100:9100"
+
+    # Required for reading host-level metrics from inside a container
+    pid: "host"
+    privileged: false
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=1M,mode=1777
+
+    networks:
+      - monitoring
+
+  # Optional: Prometheus scraping the agent
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   volumes:
+  #     - ./deployments/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+  #   ports:
+  #     - "9090:9090"
+  #   networks:
+  #     - monitoring
+
+networks:
+  monitoring:
+    driver: bridge

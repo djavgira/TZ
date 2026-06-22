@@ -1,0 +1,54 @@
+# /etc/pain_tz/pain_tz.yaml — Container-optimized defaults
+# Mount this at /etc/pain_tz/pain_tz.yaml or override via PAIN_TZ_ env vars.
+
+agent:
+  host_id: ""   # Set via PAIN_TZ_AGENT_HOST_ID env var in container
+
+collectors:
+  cpu:
+    enabled: true
+    interval: 10s
+    per_core: false
+
+  memory:
+    enabled: true
+    interval: 15s
+    include_swap: false   # Swap info often unavailable in containers
+
+  disk:
+    enabled: true
+    interval: 30s
+    mount_points: []       # Auto-discover
+    include_io: true
+    fs_type_denylist:
+      - "tmpfs"
+      - "devtmpfs"
+      - "squashfs"
+      - "overlay"
+
+  network:
+    enabled: true
+    interval: 15s
+    interfaces: []
+    interface_denylist:
+      - "lo"
+
+server:
+  listen_addr: ":9100"
+  metrics_path: "/metrics"
+  health_path: "/health"
+  readiness_path: "/ready"
+  shutdown_timeout: 10s
+  max_header_bytes: 1048576
+  read_timeout: 5s
+  write_timeout: 10s
+  idle_timeout: 120s
+
+logging:
+  level: "info"
+  format: "json"       # JSON for log aggregation (ELK/Loki)
+  output: "stdout"      # stdout for container logs
+  file_path: ""
+  max_size_mb: 100
+  max_age_days: 30
+  max_backups: 10
