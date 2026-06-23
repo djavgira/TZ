@@ -135,7 +135,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 		if err := reg.Register(c, cfg.Collectors.CPU.Interval); err != nil {
 			return fmt.Errorf("register cpu: %w", err)
 		}
-		if mc, ok := c.(collector.MetricsCollector); ok {
+		if mc, ok := interface{}(c).(collector.MetricsCollector); ok {
 			mc.RegisterMetrics(promReg)
 		}
 	}
@@ -145,7 +145,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 		if err := reg.Register(c, cfg.Collectors.Memory.Interval); err != nil {
 			return fmt.Errorf("register memory: %w", err)
 		}
-		if mc, ok := c.(collector.MetricsCollector); ok {
+		if mc, ok := interface{}(c).(collector.MetricsCollector); ok {
 			mc.RegisterMetrics(promReg)
 		}
 	}
@@ -155,7 +155,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 		if err := reg.Register(c, cfg.Collectors.Disk.Interval); err != nil {
 			return fmt.Errorf("register disk: %w", err)
 		}
-		if mc, ok := c.(collector.MetricsCollector); ok {
+		if mc, ok := interface{}(c).(collector.MetricsCollector); ok {
 			mc.RegisterMetrics(promReg)
 		}
 	}
@@ -165,7 +165,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 		if err := reg.Register(c, cfg.Collectors.Network.Interval); err != nil {
 			return fmt.Errorf("register network: %w", err)
 		}
-		if mc, ok := c.(collector.MetricsCollector); ok {
+		if mc, ok := interface{}(c).(collector.MetricsCollector); ok {
 			mc.RegisterMetrics(promReg)
 		}
 	}
