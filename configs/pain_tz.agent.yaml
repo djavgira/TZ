@@ -1,0 +1,53 @@
+# pain_tz agent mode configuration
+# Usage: pain_tz agent --config configs/pain_tz.agent.yaml
+
+agent:
+  host_id: ""   # Auto-detected from hostname if empty
+
+collectors:
+  cpu:
+    enabled: true
+    interval: 10s
+    per_core: false
+  memory:
+    enabled: true
+    interval: 15s
+    include_swap: true
+  disk:
+    enabled: true
+    interval: 30s
+    mount_points: []
+    include_io: true
+    fs_type_denylist:
+      - "tmpfs"
+      - "devtmpfs"
+      - "squashfs"
+      - "overlay"
+  network:
+    enabled: true
+    interval: 15s
+    interfaces: []
+    interface_denylist:
+      - "lo"
+
+grpc_client:
+  # Address of the pain_tz server (laptop IP or hostname)
+  server_addr: "localhost:9090"
+  # How often to push metrics to the server
+  push_interval: 5s
+  # Max backoff between reconnection attempts
+  reconnect_backoff_max: 30s
+  # Set to false for TLS in production
+  insecure: true
+
+grpc_server:
+  listen_addr: ":9090"
+  stale_timeout: 30s
+
+server:
+  listen_addr: ":9100"
+
+logging:
+  level: "info"
+  format: "text"
+  output: "stdout"

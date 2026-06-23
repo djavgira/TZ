@@ -10,6 +10,7 @@ import (
 
 	"github.com/Alice/pain_tz/internal/config"
 	"github.com/Alice/pain_tz/internal/exporter"
+	"github.com/Alice/pain_tz/pkg/metrics"
 )
 
 // Collector collects CPU metrics using gopsutil.
@@ -20,9 +21,7 @@ type Collector struct {
 
 // New creates a new CPU collector.
 func New(cfg config.CPUConfig) *Collector {
-	return &Collector{
-		cfg: cfg,
-	}
+	return &Collector{cfg: cfg}
 }
 
 // Name returns the collector name.
@@ -33,16 +32,16 @@ func (c *Collector) RegisterMetrics(reg *prometheus.Registry) error {
 	return exporter.RegisterAll(reg)
 }
 
-// Collect gathers CPU metrics. For CPU, this call blocks for the configured
-// interval duration because cpu.Percent() needs two samples.
-func (c *Collector) Collect(ctx context.Context) error {
-	// Get logical CPU count (static — only collected once)
+// Collect gathers CPU metrics into snap.CPU.
+// CPU is a blocking collector — cpu.Percent() blocks for the configured interval.
+func (c *Collector) Collect(ctx context.Context, snap *metrics.Snapshot) error {
+	// Get logical CPU count (static — only collected once per cycle)
 	logicalCount, err := cpu.Counts(true)
 	if err != nil {
 		c.healthy = false
 		return fmt.Errorf("cpu.Counts: %w", err)
 	}
-	exporter.SetCPUCount(float64(logicalCount))
+	snap.CPU.LogicalCount = uint32(logicalCount)
 
 	// cpu.Percent blocks for the given interval to compute the delta
 	interval := c.cfg.Interval
@@ -58,7 +57,7 @@ func (c *Collector) Collect(ctx context.Context) error {
 	}
 
 	if len(percentages) > 0 {
-		exporter.SetCPUUsage(percentages[0])
+		snap.CPU.UsagePercent = percentages[0]
 	}
 
 	// Get detailed time breakdown (non-blocking)
@@ -72,10 +71,10 @@ func (c *Collector) Collect(ctx context.Context) error {
 		total := times[0].User + times[0].System + times[0].Idle + times[0].Iowait +
 			times[0].Irq + times[0].Softirq + times[0].Steal
 		if total > 0 {
-			exporter.SetCPUUser((times[0].User / total) * 100)
-			exporter.SetCPUSystem((times[0].System / total) * 100)
-			exporter.SetCPUIdle((times[0].Idle / total) * 100)
-			exporter.SetCPUIOWait((times[0].Iowait / total) * 100)
+			snap.CPU.UserPercent = (times[0].User / total) * 100
+			snap.CPU.SystemPercent = (times[0].System / total) * 100
+			snap.CPU.IdlePercent = (times[0].Idle / total) * 100
+			snap.CPU.IOWaitPercent = (times[0].Iowait / total) * 100
 		}
 	}
 

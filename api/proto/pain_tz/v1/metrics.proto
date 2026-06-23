@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package pain_tz.v1;
+
+option go_package = "github.com/Alice/pain_tz/pkg/proto/pain_tz/v1;pain_tzv1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// MetricsService defines the gRPC contract between agent (client) and server.
+// Agents push metric snapshots via a client-side streaming RPC.
+service MetricsService {
+  // StreamMetrics is called by each agent to push periodic metric snapshots.
+  // The agent opens one long-lived stream and sends reports at its configured
+  // push_interval. The server returns Empty on stream close.
+  rpc StreamMetrics(stream MetricReport) returns (google.protobuf.Empty);
+}
+
+// MetricReport is a single snapshot of system metrics from one agent.
+message MetricReport {
+  // Host identifier (hostname or custom label from agent config).
+  string host_id = 1;
+
+  // Timestamp when the metrics were collected (agent-side time).
+  google.protobuf.Timestamp timestamp = 2;
+
+  CPU cpu = 3;
+  Memory memory = 4;
+  repeated Disk disks = 5;
+  repeated Network networks = 6;
+}
+
+message CPU {
+  double usage_percent = 1;
+  double user_percent = 2;
+  double system_percent = 3;
+  double idle_percent = 4;
+  double iowait_percent = 5;
+  uint32 logical_count = 6;
+}
+
+message Memory {
+  uint64 total_bytes = 1;
+  uint64 used_bytes = 2;
+  uint64 available_bytes = 3;
+  double used_percent = 4;
+  uint64 swap_total_bytes = 5;
+  uint64 swap_used_bytes = 6;
+  double swap_used_percent = 7;
+}
+
+message Disk {
+  string mountpoint = 1;
+  string device = 2;
+  string fstype = 3;
+  uint64 total_bytes = 4;
+  uint64 used_bytes = 5;
+  uint64 free_bytes = 6;
+  double used_percent = 7;
+  uint64 read_bytes = 8;
+  uint64 write_bytes = 9;
+}
+
+message Network {
+  string interface_name = 1;
+  uint64 bytes_sent = 2;
+  uint64 bytes_recv = 3;
+  uint64 packets_sent = 4;
+  uint64 packets_recv = 5;
+  uint64 errors_sent = 6;
+  uint64 errors_recv = 7;
+  uint64 drops_sent = 8;
+  uint64 drops_recv = 9;
+}

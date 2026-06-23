@@ -5,7 +5,14 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/Alice/pain_tz/pkg/metrics"
 )
+
+// SnapshotHandler is called after a successful collection cycle with the
+// collector name and the populated snapshot. The snapshot may only have
+// the subset of metrics that the specific collector fills.
+type SnapshotHandler func(name string, snap *metrics.Snapshot)
 
 type collectorEntry struct {
 	collector Collector
@@ -21,13 +28,17 @@ type Registry struct {
 	// Tracks ready state for /ready endpoint.
 	muReady sync.RWMutex
 	ready   map[string]bool
+
+	// Called after every successful collection.
+	onSnapshot SnapshotHandler
 }
 
 // NewRegistry creates an empty collector registry.
-func NewRegistry() *Registry {
+func NewRegistry(onSnapshot SnapshotHandler) *Registry {
 	return &Registry{
-		collectors: make(map[string]*collectorEntry),
-		ready:      make(map[string]bool),
+		collectors:  make(map[string]*collectorEntry),
+		ready:       make(map[string]bool),
+		onSnapshot:  onSnapshot,
 	}
 }
 
@@ -64,13 +75,9 @@ func (r *Registry) StartAll(parentCtx context.Context) {
 	}
 }
 
-// runCollector is the per-collector goroutine. For CPU collectors, the
-// Collect() call itself blocks for the sampling interval, so we use
-// a loop that checks ctx.Done(). For all others, we use a time.Ticker.
+// runCollector is the per-collector goroutine.
 func (r *Registry) runCollector(ctx context.Context, name string, entry *collectorEntry) {
 	// CPU is special: cpu.Percent blocks for the interval.
-	// We detect this by name; a cleaner approach would use an interface,
-	// but name matching keeps the interface surface minimal.
 	if name == "cpu" {
 		r.runBlockingCollector(ctx, name, entry)
 		return
@@ -101,24 +108,22 @@ func (r *Registry) runBlockingCollector(ctx context.Context, name string, entry 
 			return
 		default:
 			r.runCollectionCycle(ctx, name, entry)
-			// Check again after Collect returns, before looping
 		}
 	}
 }
 
 // runCollectionCycle executes one Collect() call and handles errors.
+// After a successful collection, the snapshot is passed to r.onSnapshot.
 func (r *Registry) runCollectionCycle(ctx context.Context, name string, entry *collectorEntry) {
 	defer func() {
 		if rc := recover(); rc != nil {
-			// Log would be better, but registry doesn't have a logger.
-			// Panic recovery prevents a single collector crash from taking
-			// down the entire agent.
+			// Panic recovery prevents a single collector crash from
+			// taking down the entire agent.
 		}
 	}()
 
-	if err := entry.collector.Collect(ctx); err != nil {
-		// Collection errors are non-fatal; the /health endpoint
-		// reflects collector status.
+	snap := &metrics.Snapshot{}
+	if err := entry.collector.Collect(ctx, snap); err != nil {
 		return
 	}
 
@@ -126,6 +131,11 @@ func (r *Registry) runCollectionCycle(ctx context.Context, name string, entry *c
 	r.muReady.Lock()
 	r.ready[name] = true
 	r.muReady.Unlock()
+
+	// Notify the handler
+	if r.onSnapshot != nil {
+		r.onSnapshot(name, snap)
+	}
 }
 
 // StopAll cancels all collector goroutines.
@@ -166,6 +176,31 @@ func (r *Registry) AllReady() bool {
 		}
 	}
 	return len(r.ready) > 0
+}
+
+// IsReady implements server.ReadyChecker.
+func (r *Registry) IsReady() bool { return r.AllReady() }
+
+// HealthStatuses implements server.HealthChecker.
+func (r *Registry) HealthStatuses() map[string]error { return r.Statuses() }
+
+// CollectAll calls Collect() on every registered collector synchronously,
+// merging results into a single Snapshot. Used by agent mode for gRPC push.
+func (r *Registry) CollectAll(ctx context.Context) (*metrics.Snapshot, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	snap := &metrics.Snapshot{}
+	for name, entry := range r.collectors {
+		if err := entry.collector.Collect(ctx, snap); err != nil {
+			return nil, fmt.Errorf("collector %q: %w", name, err)
+		}
+		// Mark ready after each successful collection
+		r.muReady.Lock()
+		r.ready[name] = true
+		r.muReady.Unlock()
+	}
+	return snap, nil
 }
 
 // Count returns the number of registered collectors.

@@ -1,0 +1,18 @@
+# Stage 1: Build (same as Dockerfile)
+FROM golang:1.23-alpine AS builder
+RUN apk add --no-cache git ca-certificates
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -trimpath -ldflags="-s -w" -o /pain_tz ./cmd/pain_tz/
+
+# Stage 2: Runtime
+FROM alpine:3.21
+RUN apk add --no-cache ca-certificates tzdata && \
+    adduser -D -u 65532 -s /sbin/nologin pain_tz
+COPY --from=builder /pain_tz /usr/local/bin/pain_tz
+COPY configs/pain_tz.agent.yaml /etc/pain_tz/pain_tz.yaml
+USER pain_tz
+ENTRYPOINT ["pain_tz", "agent", "--config", "/etc/pain_tz/pain_tz.yaml"]

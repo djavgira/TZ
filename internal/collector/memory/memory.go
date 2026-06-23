@@ -9,6 +9,7 @@ import (
 
 	"github.com/Alice/pain_tz/internal/config"
 	"github.com/Alice/pain_tz/internal/exporter"
+	"github.com/Alice/pain_tz/pkg/metrics"
 )
 
 // Collector collects memory metrics using gopsutil.
@@ -30,31 +31,31 @@ func (c *Collector) RegisterMetrics(reg *prometheus.Registry) error {
 	return exporter.RegisterAll(reg)
 }
 
-// Collect gathers memory metrics.
-func (c *Collector) Collect(ctx context.Context) error {
+// Collect gathers memory metrics into snap.Memory.
+func (c *Collector) Collect(ctx context.Context, snap *metrics.Snapshot) error {
 	v, err := mem.VirtualMemory()
 	if err != nil {
 		c.healthy = false
 		return fmt.Errorf("mem.VirtualMemory: %w", err)
 	}
 
-	exporter.SetMemoryTotal(float64(v.Total))
-	exporter.SetMemoryUsed(float64(v.Used))
-	exporter.SetMemoryAvailable(float64(v.Available))
-	exporter.SetMemoryUsedPct(v.UsedPercent)
+	snap.Memory.TotalBytes = v.Total
+	snap.Memory.UsedBytes = v.Used
+	snap.Memory.AvailableBytes = v.Available
+	snap.Memory.UsedPercent = v.UsedPercent
 
 	// Swap metrics
 	if c.cfg.IncludeSwap {
 		s, err := mem.SwapMemory()
 		if err != nil {
-			// Swap may not be available on all systems; not fatal
-			exporter.SetSwapTotal(0)
-			exporter.SetSwapUsed(0)
-			exporter.SetSwapUsedPct(0)
+			// Swap may not be available; set to zero
+			snap.Memory.SwapTotalBytes = 0
+			snap.Memory.SwapUsedBytes = 0
+			snap.Memory.SwapUsedPercent = 0
 		} else {
-			exporter.SetSwapTotal(float64(s.Total))
-			exporter.SetSwapUsed(float64(s.Used))
-			exporter.SetSwapUsedPct(s.UsedPercent)
+			snap.Memory.SwapTotalBytes = s.Total
+			snap.Memory.SwapUsedBytes = s.Used
+			snap.Memory.SwapUsedPercent = s.UsedPercent
 		}
 	}
 

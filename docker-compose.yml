@@ -1,53 +1,120 @@
 version: "3.8"
 
 services:
-  pain_tz:
+  # gRPC server (headless; attach with docker attach for TUI, or run server locally)
+  server:
     build:
       context: .
       dockerfile: Dockerfile
     image: pain_tz:latest
-    container_name: pain_tz
+    container_name: pain_tz-server
+    command: pain_tz server --config /etc/pain_tz/pain_tz.yaml
+    ports:
+      - "9090:9090"
+    environment:
+      - PAIN_TZ_AGENT_HOST_ID=server
+      - PAIN_TZ_LOGGING_FORMAT=text
+    networks:
+      - pain_tz
     restart: unless-stopped
 
-    # Mount host /proc and /sys (read-only) so gopsutil can read system metrics
+  agent-a:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    image: pain_tz-agent:latest
+    container_name: pain_tz-agent-a
+    environment:
+      - PAIN_TZ_AGENT_HOST_ID=node-a
+      - PAIN_TZ_GRPC_CLIENT_SERVER_ADDR=server:9090
+      - PAIN_TZ_GRPC_CLIENT_PUSH_INTERVAL=5s
+      - PAIN_TZ_GRPC_CLIENT_INSECURE=true
+      - HOST_PROC=/host/proc
+      - HOST_SYS=/host/sys
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
-      # Optional: mount custom config
-      # - ./configs/pain_tz.yaml:/etc/pain_tz/pain_tz.yaml:ro
-
-    # Override config via environment variables (PAIN_TZ_ prefix)
-    environment:
-      - PAIN_TZ_AGENT_HOST_ID=${HOSTNAME:-unknown}
-      # Override gopsutil paths to use /host/proc and /host/sys
-      - HOST_PROC=/host/proc
-      - HOST_SYS=/host/sys
-
-    ports:
-      - "9100:9100"
-
-    # Required for reading host-level metrics from inside a container
     pid: "host"
-    privileged: false
-    cap_drop:
-      - ALL
     read_only: true
     tmpfs:
       - /tmp:size=1M,mode=1777
-
+    cap_drop:
+      - ALL
     networks:
-      - monitoring
+      - pain_tz
+    depends_on:
+      - server
 
-  # Optional: Prometheus scraping the agent
-  # prometheus:
-  #   image: prom/prometheus:latest
-  #   volumes:
-  #     - ./deployments/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-  #   ports:
-  #     - "9090:9090"
-  #   networks:
-  #     - monitoring
+  agent-b:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    image: pain_tz-agent:latest
+    container_name: pain_tz-agent-b
+    environment:
+      - PAIN_TZ_AGENT_HOST_ID=node-b
+      - PAIN_TZ_GRPC_CLIENT_SERVER_ADDR=server:9090
+      - PAIN_TZ_GRPC_CLIENT_PUSH_INTERVAL=5s
+      - PAIN_TZ_GRPC_CLIENT_INSECURE=true
+      - HOST_PROC=/host/proc
+      - HOST_SYS=/host/sys
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    pid: "host"
+    read_only: true
+    tmpfs:
+      - /tmp:size=1M,mode=1777
+    cap_drop:
+      - ALL
+    networks:
+      - pain_tz
+    depends_on:
+      - server
+
+  agent-c:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    image: pain_tz-agent:latest
+    container_name: pain_tz-agent-c
+    environment:
+      - PAIN_TZ_AGENT_HOST_ID=node-c
+      - PAIN_TZ_GRPC_CLIENT_SERVER_ADDR=server:9090
+      - PAIN_TZ_GRPC_CLIENT_PUSH_INTERVAL=5s
+      - PAIN_TZ_GRPC_CLIENT_INSECURE=true
+      - HOST_PROC=/host/proc
+      - HOST_SYS=/host/sys
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    pid: "host"
+    read_only: true
+    tmpfs:
+      - /tmp:size=1M,mode=1777
+    cap_drop:
+      - ALL
+    networks:
+      - pain_tz
+    depends_on:
+      - server
+
+  # Optional: Prometheus scraping the serve-mode agent if running
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./deployments/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9091:9090"
+    networks:
+      - pain_tz
+    profiles:
+      - prometheus
 
 networks:
-  monitoring:
+  pain_tz:
     driver: bridge
+
+volumes:
+  prometheus_data:

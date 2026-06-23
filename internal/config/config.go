@@ -14,6 +14,8 @@ type Config struct {
 	Agent      AgentConfig      `mapstructure:"agent"`
 	Collectors CollectorsConfig `mapstructure:"collectors"`
 	Server     ServerConfig     `mapstructure:"server"`
+	GRPCClient GRPCClientConfig `mapstructure:"grpc_client"`
+	GRPCServer GRPCServerConfig `mapstructure:"grpc_server"`
 	Logging    LoggingConfig    `mapstructure:"logging"`
 }
 
@@ -61,7 +63,7 @@ type NetworkConfig struct {
 	InterfaceDenylist []string      `mapstructure:"interface_denylist"`
 }
 
-// ServerConfig holds configuration for the HTTP server.
+// ServerConfig holds configuration for the Prometheus HTTP server (serve mode).
 type ServerConfig struct {
 	ListenAddr      string        `mapstructure:"listen_addr"`
 	MetricsPath     string        `mapstructure:"metrics_path"`
@@ -72,6 +74,26 @@ type ServerConfig struct {
 	ReadTimeout     time.Duration `mapstructure:"read_timeout"`
 	WriteTimeout    time.Duration `mapstructure:"write_timeout"`
 	IdleTimeout     time.Duration `mapstructure:"idle_timeout"`
+}
+
+// GRPCClientConfig holds configuration for the agent-mode gRPC client.
+type GRPCClientConfig struct {
+	// ServerAddr is the gRPC server address (e.g., "server.laptop:9090").
+	ServerAddr string `mapstructure:"server_addr"`
+	// PushInterval is how often metrics are pushed to the server.
+	PushInterval time.Duration `mapstructure:"push_interval"`
+	// ReconnectBackoffMax is the maximum backoff duration between reconnection attempts.
+	ReconnectBackoffMax time.Duration `mapstructure:"reconnect_backoff_max"`
+	// Insecure disables TLS (for LAN/private network use).
+	Insecure bool `mapstructure:"insecure"`
+}
+
+// GRPCServerConfig holds configuration for the server-mode gRPC server.
+type GRPCServerConfig struct {
+	// ListenAddr is the gRPC server listen address.
+	ListenAddr string `mapstructure:"listen_addr"`
+	// StaleTimeout is how long without data before a host is considered stale in the TUI.
+	StaleTimeout time.Duration `mapstructure:"stale_timeout"`
 }
 
 // LoggingConfig holds configuration for logging.
@@ -85,7 +107,7 @@ type LoggingConfig struct {
 	MaxBackups int    `mapstructure:"max_backups"`
 }
 
-// DefaultConfig returns a Config with sensible defaults.
+// DefaultConfig returns a Config with sensible defaults for all modes.
 func DefaultConfig() *Config {
 	return &Config{
 		Agent: AgentConfig{
@@ -129,6 +151,16 @@ func DefaultConfig() *Config {
 			WriteTimeout:    10 * time.Second,
 			IdleTimeout:     120 * time.Second,
 		},
+		GRPCClient: GRPCClientConfig{
+			ServerAddr:          "localhost:9090",
+			PushInterval:        5 * time.Second,
+			ReconnectBackoffMax: 30 * time.Second,
+			Insecure:            true,
+		},
+		GRPCServer: GRPCServerConfig{
+			ListenAddr:   ":9090",
+			StaleTimeout: 30 * time.Second,
+		},
 		Logging: LoggingConfig{
 			Level:      "info",
 			Format:     "json",
@@ -146,11 +178,13 @@ func DefaultConfig() *Config {
 func Load(path string) (*Config, error) {
 	v := viper.New()
 
-	// Set defaults from our DefaultConfig
+	// Set defaults
 	cfg := DefaultConfig()
 	v.SetDefault("agent", cfg.Agent)
 	v.SetDefault("collectors", cfg.Collectors)
 	v.SetDefault("server", cfg.Server)
+	v.SetDefault("grpc_client", cfg.GRPCClient)
+	v.SetDefault("grpc_server", cfg.GRPCServer)
 	v.SetDefault("logging", cfg.Logging)
 
 	// Read from config file if provided
@@ -160,16 +194,14 @@ func Load(path string) (*Config, error) {
 			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 				return nil, fmt.Errorf("failed to read config file %s: %w", path, err)
 			}
-			// Config file not found is ok — use defaults
 		}
 	}
 
-	// Environment variable overrides: PAIN_TZ_SERVER_LISTEN_ADDR, etc.
+	// Environment variable overrides
 	v.SetEnvPrefix("PAIN_TZ")
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
-	// Unmarshal into Config struct
 	result := &Config{}
 	if err := v.Unmarshal(result); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)

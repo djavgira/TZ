@@ -9,6 +9,7 @@ import (
 
 	"github.com/Alice/pain_tz/internal/config"
 	"github.com/Alice/pain_tz/internal/exporter"
+	"github.com/Alice/pain_tz/pkg/metrics"
 )
 
 // Collector collects disk metrics using gopsutil.
@@ -30,8 +31,8 @@ func (c *Collector) RegisterMetrics(reg *prometheus.Registry) error {
 	return exporter.RegisterAll(reg)
 }
 
-// Collect gathers disk usage and optional IO metrics.
-func (c *Collector) Collect(ctx context.Context) error {
+// Collect gathers disk usage and optional IO metrics into snap.Disks.
+func (c *Collector) Collect(ctx context.Context, snap *metrics.Snapshot) error {
 	partitions, err := disk.Partitions(false)
 	if err != nil {
 		c.healthy = false
@@ -58,21 +59,28 @@ func (c *Collector) Collect(ctx context.Context) error {
 			continue
 		}
 
-		exporter.SetDiskTotal(p.Mountpoint, p.Device, p.Fstype, float64(usage.Total))
-		exporter.SetDiskUsed(p.Mountpoint, p.Device, p.Fstype, float64(usage.Used))
-		exporter.SetDiskFree(p.Mountpoint, p.Device, p.Fstype, float64(usage.Free))
-		exporter.SetDiskUsedPct(p.Mountpoint, p.Device, p.Fstype, usage.UsedPercent)
-	}
+		dm := metrics.DiskMetrics{
+			Mountpoint:  p.Mountpoint,
+			Device:      p.Device,
+			FSType:      p.Fstype,
+			TotalBytes:  usage.Total,
+			UsedBytes:   usage.Used,
+			FreeBytes:   usage.Free,
+			UsedPercent: usage.UsedPercent,
+		}
 
-	// IO counters (cumulative; use Add to update counters)
-	if c.cfg.IncludeIO {
-		ioCounters, err := disk.IOCounters()
-		if err == nil {
-			for name, io := range ioCounters {
-				exporter.AddDiskReadBytes(name, float64(io.ReadBytes))
-				exporter.AddDiskWriteBytes(name, float64(io.WriteBytes))
+		// IO counters
+		if c.cfg.IncludeIO {
+			ioCounters, err := disk.IOCounters(p.Device)
+			if err == nil {
+				if io, ok := ioCounters[p.Device]; ok {
+					dm.ReadBytes = io.ReadBytes
+					dm.WriteBytes = io.WriteBytes
+				}
 			}
 		}
+
+		snap.Disks = append(snap.Disks, dm)
 	}
 
 	c.healthy = true

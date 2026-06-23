@@ -10,6 +10,7 @@ import (
 
 	"github.com/Alice/pain_tz/internal/config"
 	"github.com/Alice/pain_tz/internal/exporter"
+	"github.com/Alice/pain_tz/pkg/metrics"
 )
 
 // Collector collects network metrics using gopsutil.
@@ -17,7 +18,7 @@ type Collector struct {
 	cfg     config.NetworkConfig
 	healthy bool
 
-	// Track previous values for delta calculation on cumulative counters.
+	// Track previous cumulative counter values for delta calculation.
 	mu       sync.Mutex
 	prevSent map[string]uint64
 	prevRecv map[string]uint64
@@ -40,8 +41,9 @@ func (c *Collector) RegisterMetrics(reg *prometheus.Registry) error {
 	return exporter.RegisterAll(reg)
 }
 
-// Collect gathers per-interface network counters.
-func (c *Collector) Collect(ctx context.Context) error {
+// Collect gathers per-interface network counters into snap.Networks.
+// Deltas are computed from the previous collection's cumulative values.
+func (c *Collector) Collect(ctx context.Context, snap *metrics.Snapshot) error {
 	counters, err := net.IOCounters(true) // per NIC
 	if err != nil {
 		c.healthy = false
@@ -63,30 +65,23 @@ func (c *Collector) Collect(ctx context.Context) error {
 			continue
 		}
 
-		// Calculate deltas from previous values (counters are cumulative)
+		// Calculate deltas from previous values
 		prevSentBytes := c.prevSent[nic.Name]
 		prevRecvBytes := c.prevRecv[nic.Name]
 
-		sentDelta := float64(nic.BytesSent - prevSentBytes)
-		recvDelta := float64(nic.BytesRecv - prevRecvBytes)
+		snap.Networks = append(snap.Networks, metrics.NetworkMetrics{
+			Interface:   nic.Name,
+			BytesSent:   nic.BytesSent - prevSentBytes,
+			BytesRecv:   nic.BytesRecv - prevRecvBytes,
+			PacketsSent: nic.PacketsSent,
+			PacketsRecv: nic.PacketsRecv,
+			ErrorsSent:  nic.Errin,
+			ErrorsRecv:  nic.Errout,
+			DropsSent:   nic.Dropin,
+			DropsRecv:   nic.Dropout,
+		})
 
-		// For the first collection, deltas will be the full counter value.
-		// This is acceptable — subsequent collections will show true deltas.
-
-		exporter.AddNetBytesSent(nic.Name, sentDelta)
-		exporter.AddNetBytesRecv(nic.Name, recvDelta)
-
-		// Packets
-		exporter.AddNetPacketsSent(nic.Name, float64(nic.PacketsSent))
-		exporter.AddNetPacketsRecv(nic.Name, float64(nic.PacketsRecv))
-
-		// Errors and drops
-		exporter.AddNetErrorsSent(nic.Name, float64(nic.Errin))
-		exporter.AddNetErrorsRecv(nic.Name, float64(nic.Errout))
-		exporter.AddNetDropsSent(nic.Name, float64(nic.Dropin))
-		exporter.AddNetDropsRecv(nic.Name, float64(nic.Dropout))
-
-		// Update previous values
+		// Update previous values for next delta calculation
 		c.prevSent[nic.Name] = nic.BytesSent
 		c.prevRecv[nic.Name] = nic.BytesRecv
 	}
