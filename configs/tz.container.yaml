@@ -1,8 +1,8 @@
-# /etc/pain_tz/pain_tz.yaml — Container-optimized defaults
-# Mount this at /etc/pain_tz/pain_tz.yaml or override via PAIN_TZ_ env vars.
+# /etc/tz/tz.yaml — Container-optimized defaults
+# Mount this at /etc/tz/tz.yaml or override via TZ_ env vars.
 
 agent:
-  host_id: ""   # Set via PAIN_TZ_AGENT_HOST_ID env var in container
+  host_id: ""   # Set via TZ_AGENT_HOST_ID env var in container
 
 collectors:
   cpu:

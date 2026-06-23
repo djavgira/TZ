@@ -8,7 +8,7 @@ import (
 var (
 	cpuUsagePercent = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "cpu",
 			Name:      "usage_percent",
 			Help:      "Overall CPU usage as a percentage (0-100).",
@@ -17,7 +17,7 @@ var (
 
 	cpuUserPercent = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "cpu",
 			Name:      "user_percent",
 			Help:      "CPU time spent in user mode as a percentage.",
@@ -26,7 +26,7 @@ var (
 
 	cpuSystemPercent = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "cpu",
 			Name:      "system_percent",
 			Help:      "CPU time spent in system/kernel mode as a percentage.",
@@ -35,7 +35,7 @@ var (
 
 	cpuIdlePercent = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "cpu",
 			Name:      "idle_percent",
 			Help:      "CPU idle time as a percentage.",
@@ -44,7 +44,7 @@ var (
 
 	cpuIOWaitPercent = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "cpu",
 			Name:      "iowait_percent",
 			Help:      "CPU time spent waiting for I/O as a percentage.",
@@ -53,7 +53,7 @@ var (
 
 	cpuCount = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "cpu",
 			Name:      "logical_count",
 			Help:      "Number of logical CPU cores.",
@@ -65,7 +65,7 @@ var (
 var (
 	memoryTotalBytes = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "memory",
 			Name:      "total_bytes",
 			Help:      "Total physical memory in bytes.",
@@ -74,7 +74,7 @@ var (
 
 	memoryUsedBytes = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "memory",
 			Name:      "used_bytes",
 			Help:      "Used physical memory in bytes.",
@@ -83,7 +83,7 @@ var (
 
 	memoryAvailableBytes = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "memory",
 			Name:      "available_bytes",
 			Help:      "Available physical memory in bytes (includes reclaimable).",
@@ -92,7 +92,7 @@ var (
 
 	memoryUsedPercent = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "memory",
 			Name:      "used_percent",
 			Help:      "Physical memory usage as a percentage.",
@@ -101,7 +101,7 @@ var (
 
 	swapTotalBytes = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "memory",
 			Name:      "swap_total_bytes",
 			Help:      "Total swap space in bytes.",
@@ -110,7 +110,7 @@ var (
 
 	swapUsedBytes = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "memory",
 			Name:      "swap_used_bytes",
 			Help:      "Used swap space in bytes.",
@@ -119,7 +119,7 @@ var (
 
 	swapUsedPercent = prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "memory",
 			Name:      "swap_used_percent",
 			Help:      "Swap usage as a percentage.",
@@ -131,7 +131,7 @@ var (
 var (
 	diskTotalBytes = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "disk",
 			Name:      "total_bytes",
 			Help:      "Total disk space in bytes per mount point.",
@@ -141,7 +141,7 @@ var (
 
 	diskUsedBytes = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "disk",
 			Name:      "used_bytes",
 			Help:      "Used disk space in bytes per mount point.",
@@ -151,7 +151,7 @@ var (
 
 	diskFreeBytes = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "disk",
 			Name:      "free_bytes",
 			Help:      "Free disk space in bytes per mount point.",
@@ -161,7 +161,7 @@ var (
 
 	diskUsedPercent = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "disk",
 			Name:      "used_percent",
 			Help:      "Disk usage as a percentage per mount point.",
@@ -171,7 +171,7 @@ var (
 
 	diskReadBytes = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "disk",
 			Name:      "read_bytes_total",
 			Help:      "Total bytes read from disk.",
@@ -181,7 +181,7 @@ var (
 
 	diskWriteBytes = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "disk",
 			Name:      "write_bytes_total",
 			Help:      "Total bytes written to disk.",
@@ -194,7 +194,7 @@ var (
 var (
 	netBytesSent = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "network",
 			Name:      "bytes_sent_total",
 			Help:      "Total bytes sent per network interface.",
@@ -204,7 +204,7 @@ var (
 
 	netBytesRecv = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "network",
 			Name:      "bytes_recv_total",
 			Help:      "Total bytes received per network interface.",
@@ -214,7 +214,7 @@ var (
 
 	netPacketsSent = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "network",
 			Name:      "packets_sent_total",
 			Help:      "Total packets sent per network interface.",
@@ -224,7 +224,7 @@ var (
 
 	netPacketsRecv = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "network",
 			Name:      "packets_recv_total",
 			Help:      "Total packets received per network interface.",
@@ -234,7 +234,7 @@ var (
 
 	netErrorsSent = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "network",
 			Name:      "errors_sent_total",
 			Help:      "Total transmit errors per network interface.",
@@ -244,7 +244,7 @@ var (
 
 	netErrorsRecv = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "network",
 			Name:      "errors_recv_total",
 			Help:      "Total receive errors per network interface.",
@@ -254,7 +254,7 @@ var (
 
 	netDropsSent = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "network",
 			Name:      "drops_sent_total",
 			Help:      "Total transmit drops per network interface.",
@@ -264,7 +264,7 @@ var (
 
 	netDropsRecv = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: "pain_tz",
+			Namespace: "tz",
 			Subsystem: "network",
 			Name:      "drops_recv_total",
 			Help:      "Total receive drops per network interface.",

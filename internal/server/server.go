@@ -11,7 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 
-	"github.com/Alice/pain_tz/internal/config"
+	"github.com/djavgira/TZ/internal/config"
 )
 
 // ReadyChecker is implemented by the agent to report readiness.

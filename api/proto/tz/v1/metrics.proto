@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package pain_tz.v1;
+package tz.v1;
 
-option go_package = "github.com/Alice/pain_tz/pkg/proto/pain_tz/v1;pain_tzv1";
+option go_package = "github.com/djavgira/TZ/pkg/proto/tz/v1;tzv1";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";

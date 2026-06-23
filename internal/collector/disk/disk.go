@@ -7,9 +7,9 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/shirou/gopsutil/v3/disk"
 
-	"github.com/Alice/pain_tz/internal/config"
-	"github.com/Alice/pain_tz/internal/exporter"
-	"github.com/Alice/pain_tz/pkg/metrics"
+	"github.com/djavgira/TZ/internal/config"
+	"github.com/djavgira/TZ/internal/exporter"
+	"github.com/djavgira/TZ/pkg/metrics"
 )
 
 // Collector collects disk metrics using gopsutil.

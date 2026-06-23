@@ -3,7 +3,7 @@ package collector
 import (
 	"context"
 
-	"github.com/Alice/pain_tz/pkg/metrics"
+	"github.com/djavgira/TZ/pkg/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

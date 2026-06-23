@@ -11,9 +11,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
-	"github.com/Alice/pain_tz/internal/config"
-	"github.com/Alice/pain_tz/internal/server"
-	"github.com/Alice/pain_tz/internal/server/tui"
+	"github.com/djavgira/TZ/internal/config"
+	"github.com/djavgira/TZ/internal/server"
+	"github.com/djavgira/TZ/internal/server/tui"
 )
 
 func init() {
@@ -25,7 +25,7 @@ var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Start in server mode (receive metrics + display TUI)",
 	Long: `Server mode runs a gRPC server that receives metric streams from
-multiple pain_tz agents and displays them in a top-like TUI.
+multiple tz agents and displays them in a top-like TUI.
 
 The TUI refreshes every second and color-codes resource usage:
   green (<50%)  yellow (50-80%)  red (>80%)
@@ -41,7 +41,7 @@ func runServer(cmd *cobra.Command, args []string) error {
 	}
 
 	logger := setupLogger(cfg)
-	logger.WithField("listen_addr", cfg.GRPCServer.ListenAddr).Info("starting pain_tz server")
+	logger.WithField("listen_addr", cfg.GRPCServer.ListenAddr).Info("starting tz server")
 
 	// Create store and gRPC service
 	store := server.NewStore()

@@ -1,5 +1,5 @@
-APP_NAME    := pain_tz
-PKG         := github.com/Alice/pain_tz
+APP_NAME    := tz
+PKG         := github.com/djavgira/TZ
 VERSION     ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 COMMIT      ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 BUILD_DATE  ?= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -14,7 +14,7 @@ LDFLAGS     := -s -w \
 OUT_DIR     := bin
 COVER_DIR   := coverage
 
-DOCKER_IMAGE ?= pain_tz
+DOCKER_IMAGE ?= tz
 DOCKER_TAG    ?= latest
 DOCKERFILE    ?= Dockerfile
 

@@ -8,7 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"github.com/Alice/pain_tz/internal/server"
+	"github.com/djavgira/TZ/internal/server"
 )
 
 // refreshMsg is sent periodically to refresh the table.
@@ -95,7 +95,7 @@ func (m Model) View() string {
 		return "bye.\n"
 	}
 
-	title := titleStyle.Render(fmt.Sprintf(" pain_tz · %d hosts monitored ", m.store.HostCount()))
+	title := titleStyle.Render(fmt.Sprintf(" tz · %d hosts monitored ", m.store.HostCount()))
 	status := m.renderStatus()
 	help := helpStyle.Render("q: quit  ↑↓: scroll  ·  refreshed every 1s")
 	table := m.table.View()

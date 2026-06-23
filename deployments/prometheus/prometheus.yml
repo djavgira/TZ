@@ -3,6 +3,6 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: "pain_tz"
+  - job_name: "tz"
     static_configs:
-      - targets: ["pain_tz:9100"]
+      - targets: ["tz:9100"]

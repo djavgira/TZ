@@ -1,5 +1,5 @@
-# pain_tz agent mode configuration
-# Usage: pain_tz agent --config configs/pain_tz.agent.yaml
+# tz agent mode configuration
+# Usage: tz agent --config configs/tz.agent.yaml
 
 agent:
   host_id: ""   # Auto-detected from hostname if empty
@@ -31,7 +31,7 @@ collectors:
       - "lo"
 
 grpc_client:
-  # Address of the pain_tz server (laptop IP or hostname)
+  # Address of the tz server (laptop IP or hostname)
   server_addr: "localhost:9090"
   # How often to push metrics to the server
   push_interval: 5s

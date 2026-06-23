@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Alice/pain_tz/pkg/metrics"
+	"github.com/djavgira/TZ/pkg/metrics"
 )
 
 // SnapshotHandler is called after a successful collection cycle with the

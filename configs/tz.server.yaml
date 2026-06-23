@@ -1,5 +1,5 @@
-# pain_tz server mode configuration
-# Usage: pain_tz server --config configs/pain_tz.server.yaml
+# tz server mode configuration
+# Usage: tz server --config configs/tz.server.yaml
 
 agent:
   host_id: "server"

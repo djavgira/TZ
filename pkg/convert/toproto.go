@@ -3,22 +3,22 @@ package convert
 import (
 	"time"
 
-	"github.com/Alice/pain_tz/pkg/metrics"
-	"github.com/Alice/pain_tz/pkg/proto/pain_tz/v1"
+	"github.com/djavgira/TZ/pkg/metrics"
+	"github.com/djavgira/TZ/pkg/proto/tz/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // SnapshotToProto converts a metrics.Snapshot into a protobuf MetricReport.
-func SnapshotToProto(hostID string, snap *metrics.Snapshot) *pain_tzv1.MetricReport {
+func SnapshotToProto(hostID string, snap *metrics.Snapshot) *tzv1.MetricReport {
 	ts := snap.Timestamp
 	if ts.IsZero() {
 		ts = time.Now()
 	}
 
-	report := &pain_tzv1.MetricReport{
+	report := &tzv1.MetricReport{
 		HostId:    hostID,
 		Timestamp: timestamppb.New(ts),
-		Cpu: &pain_tzv1.CPU{
+		Cpu: &tzv1.CPU{
 			UsagePercent:  snap.CPU.UsagePercent,
 			UserPercent:   snap.CPU.UserPercent,
 			SystemPercent: snap.CPU.SystemPercent,
@@ -26,7 +26,7 @@ func SnapshotToProto(hostID string, snap *metrics.Snapshot) *pain_tzv1.MetricRep
 			IowaitPercent: snap.CPU.IOWaitPercent,
 			LogicalCount:  snap.CPU.LogicalCount,
 		},
-		Memory: &pain_tzv1.Memory{
+		Memory: &tzv1.Memory{
 			TotalBytes:      snap.Memory.TotalBytes,
 			UsedBytes:       snap.Memory.UsedBytes,
 			AvailableBytes:  snap.Memory.AvailableBytes,
@@ -38,7 +38,7 @@ func SnapshotToProto(hostID string, snap *metrics.Snapshot) *pain_tzv1.MetricRep
 	}
 
 	for _, d := range snap.Disks {
-		report.Disks = append(report.Disks, &pain_tzv1.Disk{
+		report.Disks = append(report.Disks, &tzv1.Disk{
 			Mountpoint:  d.Mountpoint,
 			Device:      d.Device,
 			Fstype:      d.FSType,
@@ -52,7 +52,7 @@ func SnapshotToProto(hostID string, snap *metrics.Snapshot) *pain_tzv1.MetricRep
 	}
 
 	for _, n := range snap.Networks {
-		report.Networks = append(report.Networks, &pain_tzv1.Network{
+		report.Networks = append(report.Networks, &tzv1.Network{
 			InterfaceName: n.Interface,
 			BytesSent:     n.BytesSent,
 			BytesRecv:     n.BytesRecv,

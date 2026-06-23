@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 
-	pain_tzv1 "github.com/Alice/pain_tz/pkg/proto/pain_tz/v1"
+	tzv1 "github.com/djavgira/TZ/pkg/proto/tz/v1"
 )
 
 // Client manages a gRPC connection to the server with auto-reconnect.
@@ -22,7 +22,7 @@ type Client struct {
 	insecure  bool
 
 	conn   *grpc.ClientConn
-	stream pain_tzv1.MetricsService_StreamMetricsClient
+	stream tzv1.MetricsService_StreamMetricsClient
 }
 
 // NewClient creates a gRPC client with the given configuration.
@@ -70,7 +70,7 @@ func (c *Client) Connect(ctx context.Context) error {
 	}
 
 	// Open the stream
-	client := pain_tzv1.NewMetricsServiceClient(c.conn)
+	client := tzv1.NewMetricsServiceClient(c.conn)
 	stream, err := client.StreamMetrics(ctx)
 	if err != nil {
 		c.conn.Close()
@@ -84,7 +84,7 @@ func (c *Client) Connect(ctx context.Context) error {
 
 // Send pushes a MetricReport on the stream. Returns an error if the stream
 // is broken (caller should reconnect).
-func (c *Client) Send(report *pain_tzv1.MetricReport) error {
+func (c *Client) Send(report *tzv1.MetricReport) error {
 	if c.stream == nil {
 		return fmt.Errorf("not connected")
 	}

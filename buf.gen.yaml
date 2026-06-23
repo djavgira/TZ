@@ -3,7 +3,7 @@ managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      value: github.com/Alice/pain_tz/pkg/proto
+      value: github.com/djavgira/TZ/pkg/proto
 plugins:
   - remote: buf.build/protocolbuffers/go
     out: pkg/proto

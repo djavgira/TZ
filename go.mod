@@ -1,3 +1,3 @@
-module github.com/djavgira/pain_tz
+module github.com/djavgira/TZ
 
 go 1.26.4

@@ -1,13 +1,13 @@
 package convert
 
 import (
-	"github.com/Alice/pain_tz/internal/exporter"
-	"github.com/Alice/pain_tz/pkg/metrics"
+	"github.com/djavgira/TZ/internal/exporter"
+	"github.com/djavgira/TZ/pkg/metrics"
 )
 
 // SnapshotToPrometheus converts a metrics.Snapshot into Prometheus gauge/counter
 // updates via the exporter package. This adapter preserves backward compatibility
-// with the "pain_tz serve" (Prometheus exporter) mode.
+// with the "tz serve" (Prometheus exporter) mode.
 // The function is safe to call concurrently.
 func SnapshotToPrometheus(snap *metrics.Snapshot) {
 	// CPU

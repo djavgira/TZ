@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Config is the top-level configuration for the pain_tz agent.
+// Config is the top-level configuration for the tz agent.
 type Config struct {
 	Agent      AgentConfig      `mapstructure:"agent"`
 	Collectors CollectorsConfig `mapstructure:"collectors"`
@@ -165,7 +165,7 @@ func DefaultConfig() *Config {
 			Level:      "info",
 			Format:     "json",
 			Output:     "stdout",
-			FilePath:   "/var/log/pain_tz/agent.log",
+			FilePath:   "/var/log/tz/agent.log",
 			MaxSizeMB:  100,
 			MaxAgeDays: 30,
 			MaxBackups: 10,
@@ -174,7 +174,7 @@ func DefaultConfig() *Config {
 }
 
 // Load reads configuration from the specified path, falling back to defaults
-// and environment variables (PAIN_TZ_ prefix).
+// and environment variables (TZ_ prefix).
 func Load(path string) (*Config, error) {
 	v := viper.New()
 
@@ -198,7 +198,7 @@ func Load(path string) (*Config, error) {
 	}
 
 	// Environment variable overrides
-	v.SetEnvPrefix("PAIN_TZ")
+	v.SetEnvPrefix("TZ")
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 

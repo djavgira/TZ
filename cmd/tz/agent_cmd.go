@@ -7,13 +7,13 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/Alice/pain_tz/internal/agent"
-	"github.com/Alice/pain_tz/internal/collector"
-	cpucol "github.com/Alice/pain_tz/internal/collector/cpu"
-	diskcol "github.com/Alice/pain_tz/internal/collector/disk"
-	memcol "github.com/Alice/pain_tz/internal/collector/memory"
-	netcol "github.com/Alice/pain_tz/internal/collector/network"
-	"github.com/Alice/pain_tz/internal/config"
+	"github.com/djavgira/TZ/internal/agent"
+	"github.com/djavgira/TZ/internal/collector"
+	cpucol "github.com/djavgira/TZ/internal/collector/cpu"
+	diskcol "github.com/djavgira/TZ/internal/collector/disk"
+	memcol "github.com/djavgira/TZ/internal/collector/memory"
+	netcol "github.com/djavgira/TZ/internal/collector/network"
+	"github.com/djavgira/TZ/internal/config"
 )
 
 func init() {
@@ -25,7 +25,7 @@ var agentCmd = &cobra.Command{
 	Use:   "agent",
 	Short: "Start in agent mode (collect metrics + push to server via gRPC)",
 	Long: `Agent mode collects CPU, memory, disk, and network metrics and pushes
-them to a central pain_tz server via gRPC streaming.
+them to a central tz server via gRPC streaming.
 
 The agent connects to the server address specified in the config and
 auto-reconnects with exponential backoff on connection loss.`,
@@ -42,7 +42,7 @@ func runAgent(cmd *cobra.Command, args []string) error {
 	logger.WithFields(logrus.Fields{
 		"host_id":     cfg.Agent.HostID,
 		"server_addr": cfg.GRPCClient.ServerAddr,
-	}).Info("starting pain_tz agent")
+	}).Info("starting tz agent")
 
 	// Build collector registry (agent mode: no async goroutines, we collect synchronously)
 	reg := collector.NewRegistry(nil) // nil handler — agent mode uses CollectAll

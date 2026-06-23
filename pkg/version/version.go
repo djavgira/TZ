@@ -16,6 +16,6 @@ var (
 
 // Info returns a formatted version string.
 func Info() string {
-	return fmt.Sprintf("pain_tz %s (commit: %s, built: %s, go: %s)",
+	return fmt.Sprintf("tz %s (commit: %s, built: %s, go: %s)",
 		Version, Commit, BuildDate, runtime.Version())
 }

@@ -1,4 +1,4 @@
-# pain_tz
+# tz
 
 轻量级 Linux 主机监控探针，采集 CPU / 内存 / 磁盘 / 网络指标，通过 Prometheus `/metrics` 暴露。资源占用极低（稳态 < 12 MB 内存，< 0.05% CPU）。
 
@@ -20,67 +20,67 @@ curl http://localhost:9100/ready    # → {"ready":true}
 
 ## 配置
 
-通过环境变量覆盖默认配置，前缀 `PAIN_TZ_`，嵌套用 `_` 连接：
+通过环境变量覆盖默认配置，前缀 `TZ_`，嵌套用 `_` 连接：
 
 ```bash
 # docker-compose.yml 中设置，或直接 export
-PAIN_TZ_SERVER_LISTEN_ADDR=":9200"
-PAIN_TZ_COLLECTORS_CPU_INTERVAL="5s"
-PAIN_TZ_LOGGING_LEVEL="debug"
-PAIN_TZ_AGENT_HOST_ID="prod-web-01"
+TZ_SERVER_LISTEN_ADDR=":9200"
+TZ_COLLECTORS_CPU_INTERVAL="5s"
+TZ_LOGGING_LEVEL="debug"
+TZ_AGENT_HOST_ID="prod-web-01"
 ```
 
-完整默认配置见 `configs/pain_tz.container.yaml`。
+完整默认配置见 `configs/tz.container.yaml`。
 
 ## 指标
 
 ### CPU
 | 指标 | 类型 |
 |---|---|
-| `pain_tz_cpu_usage_percent` | Gauge |
-| `pain_tz_cpu_user_percent` | Gauge |
-| `pain_tz_cpu_system_percent` | Gauge |
-| `pain_tz_cpu_idle_percent` | Gauge |
-| `pain_tz_cpu_iowait_percent` | Gauge |
-| `pain_tz_cpu_logical_count` | Gauge |
+| `tz_cpu_usage_percent` | Gauge |
+| `tz_cpu_user_percent` | Gauge |
+| `tz_cpu_system_percent` | Gauge |
+| `tz_cpu_idle_percent` | Gauge |
+| `tz_cpu_iowait_percent` | Gauge |
+| `tz_cpu_logical_count` | Gauge |
 
 ### Memory
 | 指标 | 类型 |
 |---|---|
-| `pain_tz_memory_total_bytes` | Gauge |
-| `pain_tz_memory_used_bytes` | Gauge |
-| `pain_tz_memory_available_bytes` | Gauge |
-| `pain_tz_memory_used_percent` | Gauge |
-| `pain_tz_memory_swap_total_bytes` | Gauge |
-| `pain_tz_memory_swap_used_bytes` | Gauge |
-| `pain_tz_memory_swap_used_percent` | Gauge |
+| `tz_memory_total_bytes` | Gauge |
+| `tz_memory_used_bytes` | Gauge |
+| `tz_memory_available_bytes` | Gauge |
+| `tz_memory_used_percent` | Gauge |
+| `tz_memory_swap_total_bytes` | Gauge |
+| `tz_memory_swap_used_bytes` | Gauge |
+| `tz_memory_swap_used_percent` | Gauge |
 
 ### Disk
 | 指标 | 类型 | 标签 |
 |---|---|---|
-| `pain_tz_disk_total_bytes` | Gauge | `mountpoint`, `device`, `fstype` |
-| `pain_tz_disk_used_bytes` | Gauge | `mountpoint`, `device`, `fstype` |
-| `pain_tz_disk_free_bytes` | Gauge | `mountpoint`, `device`, `fstype` |
-| `pain_tz_disk_used_percent` | Gauge | `mountpoint`, `device`, `fstype` |
-| `pain_tz_disk_read_bytes_total` | Counter | `device` |
-| `pain_tz_disk_write_bytes_total` | Counter | `device` |
+| `tz_disk_total_bytes` | Gauge | `mountpoint`, `device`, `fstype` |
+| `tz_disk_used_bytes` | Gauge | `mountpoint`, `device`, `fstype` |
+| `tz_disk_free_bytes` | Gauge | `mountpoint`, `device`, `fstype` |
+| `tz_disk_used_percent` | Gauge | `mountpoint`, `device`, `fstype` |
+| `tz_disk_read_bytes_total` | Counter | `device` |
+| `tz_disk_write_bytes_total` | Counter | `device` |
 
 ### Network
 | 指标 | 类型 | 标签 |
 |---|---|---|
-| `pain_tz_network_bytes_sent_total` | Counter | `interface` |
-| `pain_tz_network_bytes_recv_total` | Counter | `interface` |
-| `pain_tz_network_packets_sent_total` | Counter | `interface` |
-| `pain_tz_network_packets_recv_total` | Counter | `interface` |
-| `pain_tz_network_errors_sent_total` | Counter | `interface` |
-| `pain_tz_network_errors_recv_total` | Counter | `interface` |
-| `pain_tz_network_drops_sent_total` | Counter | `interface` |
-| `pain_tz_network_drops_recv_total` | Counter | `interface` |
+| `tz_network_bytes_sent_total` | Counter | `interface` |
+| `tz_network_bytes_recv_total` | Counter | `interface` |
+| `tz_network_packets_sent_total` | Counter | `interface` |
+| `tz_network_packets_recv_total` | Counter | `interface` |
+| `tz_network_errors_sent_total` | Counter | `interface` |
+| `tz_network_errors_recv_total` | Counter | `interface` |
+| `tz_network_drops_sent_total` | Counter | `interface` |
+| `tz_network_drops_recv_total` | Counter | `interface` |
 
 ## 项目结构
 
 ```
-├── cmd/pain_tz/main.go          # 入口
+├── cmd/tz/main.go          # 入口
 ├── internal/
 │   ├── agent/agent.go           # 编排层
 │   ├── collector/               # 采集器 (cpu/memory/disk/network)

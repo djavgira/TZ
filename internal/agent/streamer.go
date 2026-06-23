@@ -6,8 +6,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/Alice/pain_tz/internal/collector"
-	"github.com/Alice/pain_tz/pkg/convert"
+	"github.com/djavgira/TZ/internal/collector"
+	"github.com/djavgira/TZ/pkg/convert"
 )
 
 // Streamer collects metrics synchronously and pushes them via gRPC.

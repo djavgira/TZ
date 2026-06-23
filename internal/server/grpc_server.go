@@ -8,12 +8,12 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	pain_tzv1 "github.com/Alice/pain_tz/pkg/proto/pain_tz/v1"
+	tzv1 "github.com/djavgira/TZ/pkg/proto/tz/v1"
 )
 
 // GRPCServer implements the MetricsService gRPC server.
 type GRPCServer struct {
-	pain_tzv1.UnimplementedMetricsServiceServer
+	tzv1.UnimplementedMetricsServiceServer
 	store  *Store
 	logger *logrus.Logger
 }
@@ -29,7 +29,7 @@ func NewGRPCServer(store *Store, logger *logrus.Logger) *GRPCServer {
 // StreamMetrics receives a stream of MetricReports from a single agent.
 // Each report is merged into the store. When the stream ends, an Empty
 // response is returned.
-func (s *GRPCServer) StreamMetrics(stream pain_tzv1.MetricsService_StreamMetricsServer) error {
+func (s *GRPCServer) StreamMetrics(stream tzv1.MetricsService_StreamMetricsServer) error {
 	var hostID string
 
 	for {

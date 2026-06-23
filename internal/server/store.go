@@ -5,14 +5,14 @@ import (
 	"sync"
 	"time"
 
-	pain_tzv1 "github.com/Alice/pain_tz/pkg/proto/pain_tz/v1"
+	tzv1 "github.com/djavgira/TZ/pkg/proto/tz/v1"
 )
 
 // HostSnapshot holds the latest metrics received from a single agent.
 type HostSnapshot struct {
 	HostID   string
 	LastSeen time.Time
-	Report   *pain_tzv1.MetricReport
+	Report   *tzv1.MetricReport
 }
 
 // Store is a thread-safe in-memory store of the latest metrics per host.
@@ -29,7 +29,7 @@ func NewStore() *Store {
 }
 
 // Update merges a received MetricReport into the store.
-func (s *Store) Update(report *pain_tzv1.MetricReport) {
+func (s *Store) Update(report *tzv1.MetricReport) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

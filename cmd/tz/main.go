@@ -11,24 +11,24 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
-	"github.com/Alice/pain_tz/internal/collector"
-	cpucol "github.com/Alice/pain_tz/internal/collector/cpu"
-	diskcol "github.com/Alice/pain_tz/internal/collector/disk"
-	memcol "github.com/Alice/pain_tz/internal/collector/memory"
-	netcol "github.com/Alice/pain_tz/internal/collector/network"
-	"github.com/Alice/pain_tz/internal/config"
-	"github.com/Alice/pain_tz/internal/server"
-	"github.com/Alice/pain_tz/pkg/convert"
-	"github.com/Alice/pain_tz/pkg/metrics"
-	"github.com/Alice/pain_tz/pkg/version"
+	"github.com/djavgira/TZ/internal/collector"
+	cpucol "github.com/djavgira/TZ/internal/collector/cpu"
+	diskcol "github.com/djavgira/TZ/internal/collector/disk"
+	memcol "github.com/djavgira/TZ/internal/collector/memory"
+	netcol "github.com/djavgira/TZ/internal/collector/network"
+	"github.com/djavgira/TZ/internal/config"
+	"github.com/djavgira/TZ/internal/server"
+	"github.com/djavgira/TZ/pkg/convert"
+	"github.com/djavgira/TZ/pkg/metrics"
+	"github.com/djavgira/TZ/pkg/version"
 )
 
 var cfgFile string
 
 var rootCmd = &cobra.Command{
-	Use:   "pain_tz",
-	Short: "pain_tz — lightweight Linux monitoring agent",
-	Long: `pain_tz is a lightweight Linux monitoring agent that collects
+	Use:   "tz",
+	Short: "tz — lightweight Linux monitoring agent",
+	Long: `tz is a lightweight Linux monitoring agent that collects
 CPU, memory, disk, and network metrics.
 
 Three modes:
@@ -45,7 +45,7 @@ Three modes:
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Standalone Prometheus exporter mode",
-	Long:  "Start the pain_tz agent in standalone mode, collecting metrics and exposing them via HTTP /metrics for Prometheus scraping.",
+	Long:  "Start the tz agent in standalone mode, collecting metrics and exposing them via HTTP /metrics for Prometheus scraping.",
 	RunE:  runServe,
 }
 
@@ -119,7 +119,7 @@ func runServe(cmd *cobra.Command, args []string) error {
 		"commit":     version.Commit,
 		"build_date": version.BuildDate,
 		"host_id":    cfg.Agent.HostID,
-	}).Info("starting pain_tz (serve mode)")
+	}).Info("starting tz (serve mode)")
 
 	// serveModeHandler bridges collector snapshots to Prometheus exporters
 	serveModeHandler := func(name string, snap *metrics.Snapshot) {
