@@ -1,14 +1,16 @@
 # tz
 
-轻量级 Linux 主机监控探针，采集 CPU / 内存 / 磁盘 / 网络指标，通过 Prometheus `/metrics` 暴露。资源占用极低（稳态 < 12 MB 内存，< 0.05% CPU）。
+轻量级 Linux 主机监控探针，采集 CPU / 内存 / 磁盘 / 网络指标。资源占用极低（稳态 < 12 MB 内存，< 0.05% CPU）。
 
 ## 快速开始
 
 ```bash
-docker-compose up -d
-```
+# 编译
+buf generate && go mod tidy && make build
 
-验证：
+# 启动（serve 模式，Prometheus exporter :9100）
+./bin/tz serve
+```
 
 ```bash
 curl http://localhost:9100/metrics
@@ -16,86 +18,45 @@ curl http://localhost:9100/health   # → {"status":"healthy"}
 curl http://localhost:9100/ready    # → {"ready":true}
 ```
 
-> `docker-compose.yml` 已自动挂载宿主机 `/proc` 和 `/sys` 并注入 `HOST_PROC` / `HOST_SYS` 环境变量，确保采集宿主机而非容器的资源指标。
+## Docker Compose（1 server + 3 agent）
+
+```bash
+docker-compose up -d
+docker attach tz-server            # 查看 TUI，q 退出
+```
+
+## 三种模式
+
+```bash
+tz serve                            # 独立 Prometheus exporter (:9100)
+tz agent --config configs/tz.agent.yaml    # gRPC 客户端，推送指标到 server
+tz server --config configs/tz.server.yaml  # gRPC 服务器 + TUI，接收 agent 指标
+```
 
 ## 配置
 
-通过环境变量覆盖默认配置，前缀 `TZ_`，嵌套用 `_` 连接：
+默认值见 `configs/tz.yaml`，通过环境变量覆盖（前缀 `TZ_`）：
 
 ```bash
-# docker-compose.yml 中设置，或直接 export
-TZ_SERVER_LISTEN_ADDR=":9200"
-TZ_COLLECTORS_CPU_INTERVAL="5s"
-TZ_LOGGING_LEVEL="debug"
-TZ_AGENT_HOST_ID="prod-web-01"
+export TZ_AGENT_HOST_ID="web-01"
+export TZ_COLLECTORS_CPU_INTERVAL="5s"
+export TZ_LOGGING_LEVEL="debug"
 ```
-
-完整默认配置见 `configs/tz.container.yaml`。
 
 ## 指标
 
-### CPU
-| 指标 | 类型 |
-|---|---|
-| `tz_cpu_usage_percent` | Gauge |
-| `tz_cpu_user_percent` | Gauge |
-| `tz_cpu_system_percent` | Gauge |
-| `tz_cpu_idle_percent` | Gauge |
-| `tz_cpu_iowait_percent` | Gauge |
-| `tz_cpu_logical_count` | Gauge |
+| 类别 | 指标前缀 | 例 |
+|------|---------|----|
+| CPU | `tz_cpu_*` | `tz_cpu_usage_percent`, `tz_cpu_logical_count` |
+| Memory | `tz_memory_*` | `tz_memory_used_percent`, `tz_memory_swap_used_bytes` |
+| Disk | `tz_disk_*` | `tz_disk_used_percent{mountpoint="/"}` |
+| Network | `tz_network_*` | `tz_network_bytes_recv_total{interface="eth0"}` |
 
-### Memory
-| 指标 | 类型 |
-|---|---|
-| `tz_memory_total_bytes` | Gauge |
-| `tz_memory_used_bytes` | Gauge |
-| `tz_memory_available_bytes` | Gauge |
-| `tz_memory_used_percent` | Gauge |
-| `tz_memory_swap_total_bytes` | Gauge |
-| `tz_memory_swap_used_bytes` | Gauge |
-| `tz_memory_swap_used_percent` | Gauge |
-
-### Disk
-| 指标 | 类型 | 标签 |
-|---|---|---|
-| `tz_disk_total_bytes` | Gauge | `mountpoint`, `device`, `fstype` |
-| `tz_disk_used_bytes` | Gauge | `mountpoint`, `device`, `fstype` |
-| `tz_disk_free_bytes` | Gauge | `mountpoint`, `device`, `fstype` |
-| `tz_disk_used_percent` | Gauge | `mountpoint`, `device`, `fstype` |
-| `tz_disk_read_bytes_total` | Counter | `device` |
-| `tz_disk_write_bytes_total` | Counter | `device` |
-
-### Network
-| 指标 | 类型 | 标签 |
-|---|---|---|
-| `tz_network_bytes_sent_total` | Counter | `interface` |
-| `tz_network_bytes_recv_total` | Counter | `interface` |
-| `tz_network_packets_sent_total` | Counter | `interface` |
-| `tz_network_packets_recv_total` | Counter | `interface` |
-| `tz_network_errors_sent_total` | Counter | `interface` |
-| `tz_network_errors_recv_total` | Counter | `interface` |
-| `tz_network_drops_sent_total` | Counter | `interface` |
-| `tz_network_drops_recv_total` | Counter | `interface` |
-
-## 项目结构
-
-```
-├── cmd/tz/main.go          # 入口
-├── internal/
-│   ├── agent/agent.go           # 编排层
-│   ├── collector/               # 采集器 (cpu/memory/disk/network)
-│   ├── config/config.go         # 配置加载
-│   ├── server/                  # HTTP Server (/metrics /health /ready)
-│   └── exporter/prometheus.go   # Prometheus 指标
-├── configs/                     # 默认配置 & 容器配置
-├── Dockerfile                   # 多阶段容器构建
-├── docker-compose.yml
-└── Makefile
-```
+完整列表见 `/metrics` 端点输出。
 
 ## 技术栈
 
-[gopsutil v3](https://github.com/shirou/gopsutil) · [prometheus/client_golang](https://github.com/prometheus/client_golang) · [viper](https://github.com/spf13/viper) · [cobra](https://github.com/spf13/cobra) · [logrus](https://github.com/sirupsen/logrus)
+gopsutil · prometheus/client_golang · cobra · viper · logrus · bubbletea · gRPC · Buf
 
 ## License
 
