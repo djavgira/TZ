@@ -14,6 +14,7 @@ import (
 	"github.com/djavgira/TZ/internal/config"
 	"github.com/djavgira/TZ/internal/server"
 	"github.com/djavgira/TZ/internal/server/tui"
+	tzv1 "github.com/djavgira/TZ/pkg/proto/tz/v1"
 )
 
 func init() {
@@ -65,10 +66,8 @@ func runServer(cmd *cobra.Command, args []string) error {
 		}),
 	)
 
-	// Register the service
-	// (the proto-generated RegisterMetricsServiceServer will be available after buf generate)
-	// For now, we register via the generated code - this will compile after buf generate
-	// server.RegisterMetricsServiceServer(grpcSrv, svc)
+	// Register the gRPC MetricsService
+	tzv1.RegisterMetricsServiceServer(grpcSrv, svc)
 
 	go func() {
 		logger.Info("gRPC server listening")
