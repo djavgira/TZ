@@ -33,6 +33,39 @@ tz agent --config configs/tz.agent.yaml    # gRPC 客户端，推送指标到 se
 tz server --config configs/tz.server.yaml  # gRPC 服务器 + TUI，接收 agent 指标
 ```
 
+## 远程监控（公网云服务器 → 笔记本）
+
+通过 Tailscale 组网，agent 直连笔记本 server：
+
+```bash
+# 笔记本 & 所有云服务器都装 Tailscale
+tailscale up
+```
+
+```bash
+# 笔记本（查看 TUI）
+./bin/tz server
+
+# 云服务器 agent 配置
+grpc_client:
+  server_addr: "100.x.x.x:9090"   # 笔记本的 Tailscale IP
+  insecure: true
+```
+
+```
+云服务器 A (tz agent) ──┐
+云服务器 B (tz agent) ──┼── gRPC stream ──→ 笔记本 (tz server + TUI)
+云服务器 C (tz agent) ──┘                    100.x.x.x:9090
+```
+
+也支持无第三方依赖的 SSH 反向隧道：
+
+```bash
+# 笔记本开 server 后，云服务器执行
+ssh -R 19090:localhost:9090 user@laptop
+# agent 连 localhost:19090
+```
+
 ## 配置
 
 默认值见 `configs/tz.yaml`，通过环境变量覆盖（前缀 `TZ_`）：
