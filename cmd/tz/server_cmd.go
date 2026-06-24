@@ -40,6 +40,9 @@ func runServer(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 
+	ctx, cancel := signalContext()
+	defer cancel()
+
 	logger := setupLogger(cfg)
 	logger.WithField("listen_addr", cfg.GRPCServer.ListenAddr).Info("starting tz server")
 
@@ -91,7 +94,9 @@ func runServer(cmd *cobra.Command, args []string) error {
 	p := tea.NewProgram(m, tea.WithAltScreen())
 
 	if _, err := p.Run(); err != nil {
-		return fmt.Errorf("TUI error: %w", err)
+		logger.WithError(err).Warn("TUI unavailable, running headless (no TTY)")
+		logger.Info("gRPC server ready, waiting for agent connections...")
+		<-ctx.Done()
 	}
 
 	// Cleanup after TUI exits
