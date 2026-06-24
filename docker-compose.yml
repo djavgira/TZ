@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     image: tz:latest
     container_name: tz-server
-    command: tz server --config /etc/tz/tz.yaml
+    command: server --config /etc/tz/tz.yaml
     ports:
       - "9090:9090"
     environment:
