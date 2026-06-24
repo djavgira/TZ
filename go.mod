@@ -1,6 +1,6 @@
 module github.com/djavgira/TZ
 
-go 1.26.4
+go 1.23
 
 require (
 	github.com/charmbracelet/bubbles v1.0.0

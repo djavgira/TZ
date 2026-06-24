@@ -46,7 +46,7 @@ tailscale up
 # 笔记本（查看 TUI）
 ./bin/tz server
 
-# 云服务器 agent 配置
+# 云服务器 agent 配置  修改tz.agent.yaml
 grpc_client:
   server_addr: "100.x.x.x:9090"   # 笔记本的 Tailscale IP
   insecure: true

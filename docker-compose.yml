@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   # gRPC server (headless; attach with docker attach for TUI, or run server locally)
   server:
