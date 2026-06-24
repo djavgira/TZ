@@ -15,4 +15,5 @@ RUN apk add --no-cache ca-certificates tzdata && \
 COPY --from=builder /tz /usr/local/bin/tz
 COPY configs/tz.agent.yaml /etc/tz/tz.yaml
 USER tz
-ENTRYPOINT ["tz", "agent", "--config", "/etc/tz/tz.yaml"]
+ENTRYPOINT ["tz"]
+CMD ["agent", "--config", "/etc/tz/tz.yaml"]

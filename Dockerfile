@@ -33,4 +33,5 @@ EXPOSE 9100
 HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3 \
     CMD wget -qO- http://localhost:9100/health || exit 1
 
-ENTRYPOINT ["tz", "serve", "--config", "/etc/tz/tz.yaml"]
+ENTRYPOINT ["tz"]
+CMD ["serve", "--config", "/etc/tz/tz.yaml"]
