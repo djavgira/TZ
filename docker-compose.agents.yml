@@ -1,0 +1,31 @@
+# 云服务器部署：只跑 agent，连笔记本上的 server
+# 笔记本上跑: ./bin/tz server
+# 云服务器上跑: docker compose -f docker-compose.agents.yml up -d
+#
+# 前提: 双方都装了 Tailscale
+
+services:
+  agent-1:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    image: tz-agent:latest
+    container_name: tz-agent-1
+    network_mode: host
+    environment:
+      - TZ_AGENT_HOST_ID=cloud-1
+      - TZ_GRPC_CLIENT_SERVER_ADDR=100.103.48.45:9090   # 笔记本 Tailscale IP
+      - TZ_GRPC_CLIENT_INSECURE=true
+      - TZ_LOGGING_FORMAT=text
+      - HOST_PROC=/host/proc
+      - HOST_SYS=/host/sys
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    pid: "host"
+    read_only: true
+    tmpfs:
+      - /tmp:size=1M,mode=1777
+    cap_drop:
+      - ALL
+    restart: unless-stopped
