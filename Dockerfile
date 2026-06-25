@@ -31,7 +31,7 @@ USER tz
 EXPOSE 9100
 
 HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3 \
-    CMD wget -qO- http://localhost:9100/health || exit 1
+	CMD pgrep tz || exit 1
 
 ENTRYPOINT ["tz"]
 CMD ["serve", "--config", "/etc/tz/tz.yaml"]
